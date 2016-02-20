@@ -26,7 +26,7 @@ unsigned int total_files = 0;
 void setup()
 {
 
-  // Serial.begin(9600);
+  Serial.begin(9600);
 
   initSD();  // Initialize the SD card
   initMP3Player(); // Initialize the MP3 Shield
@@ -39,9 +39,10 @@ void setup()
   }
 
   EEPROM_readAnything(0, configuration);
+ 
+ randomSeed(analogRead(0));
 
-  // Serial.println(total_files+1);
-
+ 
 }
 
 // All the loop does is continuously step through the trigger
@@ -52,13 +53,16 @@ void loop()
 {
 
   if (!MP3player.isPlaying()) {
+    EEPROM_readAnything(0, configuration);
     num = random(0,total_files+1); 
-    while(configuration.last_file_number == num)
+    while(configuration.last_file_number == num) {
       num = random(0,total_files+1);  
+    }
     configuration.last_file_number = num;
     EEPROM_writeAnything(0, configuration);
     sprintf(mfile,"track%03d.mp3",num);
     MP3player.playMP3(mfile);
+    Serial.println(mfile);
     while(MP3player.isPlaying());
   }
 
